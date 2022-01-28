@@ -20,5 +20,5 @@ LigthBnb is an app that conducts back-end queries that allow users to search for
 - Express
 - Node 14.x or above
 - node-postgres >= 8.2
-- Cookie-parser
+- Cookie-session
 - Body-parser
