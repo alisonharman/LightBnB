@@ -4,7 +4,7 @@ LigthBnb is an app that conducts back-end queries that allow users to search for
 
 ## Screenshots
 
-!["Screenshot of main page"]()
+!["Screenshot of main page"](https://github.com/alisonharman/LightBnB/blob/main/docs/main_page_LightBnB.png)
 
 
 ## Getting Started
