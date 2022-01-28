@@ -68,6 +68,8 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser = function(user) {
+  // emails should be case-insensitive so all changed to lowercase 
+  user.email = user.email.toLowerCase();
   return pool
     .query(`
   INSERT INTO users (name, email, password)
@@ -119,7 +121,7 @@ exports.getAllReservations = getAllReservations;
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-const getAllProperties = function(options, limit = 10) {
+const getAllProperties = function(options, limit = 20) {
 
   const queryParams = [];
 
@@ -144,8 +146,11 @@ const getAllProperties = function(options, limit = 10) {
   }
 
   if (options.minimum_price_per_night) {
-    const costPerNight = parseFloat(options.minimum_price_per_night) * 100;
+    // cost_per_night should be in cents to query database correctly but user input is integer dollar amount
+    const costPerNight = options.minimum_price_per_night * 100;
+    // add to query parameters
     queryParams.push(costPerNight);
+    // if first parameter, then start WHERE clause as filter; otherwise join with AND to an exsiting WHERE clause
     if (queryParams.length === 1) {
       queryString += `WHERE cost_per_night > $${queryParams.length} `;
     } else {
@@ -154,7 +159,7 @@ const getAllProperties = function(options, limit = 10) {
   }
 
   if (options.maximum_price_per_night) {
-    const costPerNight = parseFloat(options.maximum_price_per_night) * 100;
+    const costPerNight = options.maximum_price_per_night * 100;
     queryParams.push(costPerNight);
     if (queryParams.length === 1) {
       queryString += `WHERE cost_per_night < $${queryParams.length} `;
@@ -168,7 +173,8 @@ const getAllProperties = function(options, limit = 10) {
   `;
 
   if (options.minimum_rating) {
-    queryParams.push(options.minimum_rating);
+    // option.minimum_ratins comes in as string (representing an integer) but should ideally be cast as integer?
+    queryParams.push(parseInt(options.minimum_rating));
     queryString += `HAVING avg(property_reviews.rating) >= $${queryParams.length} `;
   }
 
@@ -177,6 +183,8 @@ const getAllProperties = function(options, limit = 10) {
   ORDER BY cost_per_night
   LIMIT $${queryParams.length};
   `;
+
+  console.log(queryString, queryParams);
 
   return pool
     .query(queryString, queryParams)
@@ -188,9 +196,7 @@ const getAllProperties = function(options, limit = 10) {
     });
 };
 
-//getAllProperties();
 exports.getAllProperties = getAllProperties;
-
 
 /**
  * Add a property to the database
